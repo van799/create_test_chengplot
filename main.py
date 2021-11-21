@@ -1,7 +1,5 @@
-from Bin import func_bin
 from matplotlib import pyplot as plt
 import numpy as np
-import cv2
 
 
 
@@ -33,7 +31,7 @@ for i in range(1, count_test_pic):
     greay = img_R + img_G + img_B
 # gray pic -> bin pic
     (Xsize, Ysize) = greay.shape
-    arr_all_pic = np.zeros((Xsize*Ysize, count_test_pic), np.int32)
+    arr_all_pic = np.zeros((Xsize*Ysize*count_test_pic), np.int32)
     threshold = gl_thesh * np.ones(greay.shape)
     greater = greay >= threshold
     binarized_image = greater * 1
@@ -45,33 +43,31 @@ for i in range(1, count_test_pic):
     greay_reshape = binarized_image.reshape(-1).astype(np.int32)
     (size_arr) = greay_reshape.shape
 
-    arr_all_pic[:, i] = greay_reshape
+    arr_all_pic[Xsize*Ysize*(i - 1):Xsize*Ysize*i] = greay_reshape
+    size_arr = Xsize*Ysize*i
 
 
 
 
-for i in range(1, count_test_pic-1):
-    arr_all_pic_concatente = np.concatenate(arr_all_pic[1, i], arr_all_pic[1, i+1])
 
-(size_arr) = arr_all_pic_concatente.shape
 text_saveCH1_odd = np.zeros((size_arr), np.int32)
 text_saveCH2_even = np.zeros((size_arr), np.int32)
 
 count_ij = 1
 for i in range(0, (size_arr), 2):
     text_saveCH1_odd[0] = 0
-    text_saveCH1_odd[count_ij] = greay_reshape[i]
+    text_saveCH1_odd[count_ij] = arr_all_pic[i]
     count_ij = count_ij + 1
 
 count_ij = 1
 for i in range(1, (size_arr), 2):
     text_saveCH2_even[0] = 0
-    text_saveCH2_even[count_ij] = greay_reshape[i]
+    text_saveCH2_even[count_ij] = arr_all_pic[i]
     count_ij = count_ij + 1
 
 count_str = 1
-str_st = np.zeros((size_arr), np.int32)
-kdr_st = np.zeros((size_arr), np.int32)
+str_st = np.zeros((size_arr+Xsize), np.int32)
+kdr_st = np.zeros((size_arr+Xsize), np.int32)
 
 for i in range(1, size_arr + 1):
     kdr_st[0] = 1
@@ -79,7 +75,7 @@ for i in range(1, size_arr + 1):
         kdr_st[i] = 1
 
 count_size = 0
-for j in range(0, size_arr, 1):
+for j in range(0, Ysize*count_test_pic-1, 1):
     for i in range(1, Xsize // 2 + 1, 1):
         count_size = count_size + 1
         if i == Xsize // 2:
@@ -92,12 +88,12 @@ with open("STR.txt", 'w') as file:
         file.write(str(str_st[i]) + '\n')
 
 with open("KDR.txt", 'w') as file:
-    for i in range((size_arr)*i):
+    for i in range((size_arr)):
         file.write(str(kdr_st[i]) + '\n')
 
 with open("DATA_READ1CH.txt", 'w') as file:
-    for i in range((size_arr)*i):
+    for i in range((size_arr)):
         file.write(format(text_saveCH1_odd[i]) + '\n')
 with open("DATA_READ2CH.txt", 'w') as file:
-    for i in range((size_arr)*i):
+    for i in range((size_arr)):
         file.write(format(text_saveCH2_even[i]) + '\n')
