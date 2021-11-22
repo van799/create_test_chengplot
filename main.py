@@ -4,7 +4,7 @@ import numpy as np
 
 
 
-
+DUO_CH = 1
 count_test_pic = 3
 gl_thesh = 127
 
@@ -69,22 +69,24 @@ count_str = 1
 str_st = np.zeros((size_arr+Xsize), np.int32)
 kdr_st = np.zeros((size_arr+Xsize), np.int32)
 
-for i in range(1, size_arr + 1):
+num_pic = 1
+for i in range(1, size_arr//DUO_CH+Xsize):
     kdr_st[0] = 1
-    if i == ((Ysize * Xsize) // 2):
+    if i == ((Ysize * Xsize) // DUO_CH)*num_pic:
         kdr_st[i] = 1
-
+        num_pic = num_pic + 1
 count_size = 0
-for j in range(0, Ysize*count_test_pic-1, 1):
-    for i in range(1, Xsize // 2 + 1, 1):
+
+for j in range(0, Ysize*(count_test_pic-1), 1):
+    for i in range(1, Xsize // DUO_CH + 1, 1):
         count_size = count_size + 1
-        if i == Xsize // 2:
+        if i == Xsize // DUO_CH:
             str_st[count_size] = 1
             str_st[0] = 1
 
     # создание ТХТ файлов
 with open("STR.txt", 'w') as file:
-    while i > size_arr*count_test_pic:
+    for i in range((size_arr)):
         file.write(str(str_st[i]) + '\n')
 
 with open("KDR.txt", 'w') as file:
