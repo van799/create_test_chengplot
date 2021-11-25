@@ -5,13 +5,14 @@ import numpy as np
 
 
 DUO_CH = 1
-count_test_pic = 3
+count_test_pic = 4
 gl_thesh = 127
 
 
-
-
-for i in range(1, count_test_pic):
+Ysize = 1080
+Xsize = 1920
+arr_all_pic = np.zeros((Xsize * Ysize * count_test_pic+1), np.int32)
+for i in range(1, count_test_pic+1):
     rgb_img = plt.imread('(' + str(i) + ').bmp')
 
 
@@ -31,7 +32,6 @@ for i in range(1, count_test_pic):
     greay = img_R + img_G + img_B
 # gray pic -> bin pic
     (Xsize, Ysize) = greay.shape
-    arr_all_pic = np.zeros((Xsize*Ysize*count_test_pic), np.int32)
     threshold = gl_thesh * np.ones(greay.shape)
     greater = greay >= threshold
     binarized_image = greater * 1
@@ -50,52 +50,57 @@ for i in range(1, count_test_pic):
 
 
 
-text_saveCH1_odd = np.zeros((size_arr), np.int32)
-text_saveCH2_even = np.zeros((size_arr), np.int32)
+text_saveCH1_odd = np.zeros((size_arr+Xsize), np.int32)
+text_saveCH2_even = np.zeros((size_arr+Xsize), np.int32)
+if DUO_CH == 1:
+    chenal = 2
+else:
+    chenal = 1
 
 count_ij = 1
-for i in range(0, (size_arr), 2):
+for i in range(0, (size_arr+1), chenal):
     text_saveCH1_odd[0] = 0
     text_saveCH1_odd[count_ij] = arr_all_pic[i]
     count_ij = count_ij + 1
 
 count_ij = 1
-for i in range(1, (size_arr), 2):
+for i in range(1, (size_arr+1), chenal):
     text_saveCH2_even[0] = 0
     text_saveCH2_even[count_ij] = arr_all_pic[i]
     count_ij = count_ij + 1
 
 count_str = 1
-str_st = np.zeros((size_arr+Xsize), np.int32)
-kdr_st = np.zeros((size_arr+Xsize), np.int32)
+str_st = np.zeros((size_arr//chenal+Xsize), np.int32)
+kdr_st = np.zeros((size_arr//chenal+Xsize), np.int32)
 
 num_pic = 1
-for i in range(1, size_arr//DUO_CH+Xsize):
+for i in range(1, size_arr//chenal, 1):
     kdr_st[0] = 1
-    if i == ((Ysize * Xsize) // DUO_CH)*num_pic:
+    if i == ((Ysize * Xsize) // chenal)*num_pic:
         kdr_st[i] = 1
         num_pic = num_pic + 1
-count_size = 0
 
-for j in range(0, Ysize*(count_test_pic-1), 1):
-    for i in range(1, Xsize // DUO_CH + 1, 1):
+count_size = 0
+for j in range(0, Ysize*(count_test_pic), 1):
+    for i in range(1, Xsize//chenal+1, 1):
         count_size = count_size + 1
-        if i == Xsize // DUO_CH:
+        if i == Xsize//chenal:
             str_st[count_size] = 1
             str_st[0] = 1
 
     # создание ТХТ файлов
 with open("STR.txt", 'w') as file:
-    for i in range((size_arr)):
+    for i in range((size_arr//chenal+Xsize)):
         file.write(str(str_st[i]) + '\n')
 
 with open("KDR.txt", 'w') as file:
-    for i in range((size_arr)):
+    for i in range((size_arr//chenal+Xsize)):
         file.write(str(kdr_st[i]) + '\n')
 
 with open("DATA_READ1CH.txt", 'w') as file:
-    for i in range((size_arr)):
+    for i in range((size_arr//chenal+Xsize)):
         file.write(format(text_saveCH1_odd[i]) + '\n')
-with open("DATA_READ2CH.txt", 'w') as file:
-    for i in range((size_arr)):
-        file.write(format(text_saveCH2_even[i]) + '\n')
+if DUO_CH == 1:
+    with open("DATA_READ2CH.txt", 'w') as file:
+        for i in range((size_arr//chenal+Xsize)):
+            file.write(format(text_saveCH2_even[i]) + '\n')
